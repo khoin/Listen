@@ -2,6 +2,18 @@
 Something for Audiotool.
 First time I've touched my hands into authenticating users and stuffs like that.
 
+!(screenshot)[http://i.imgur.com/aSE9Uq3.png]
+
+## Concept
+
+Sometimes, I prevent to listen to a track because of its title, cover art, number of favorites.
+
+This app gives you no information about the track you're listening to (not even the track's name - unless you pull up the console).
+
+Just log into your [Audiotoool(http://audiotool.com), and enjoy. 
+
+There are only 3 buttons for your need: Play/Pause , Link to Track, and a Fav.
+
 ## Install
 
 Just put this HTML into any of your server and it works instantly.
