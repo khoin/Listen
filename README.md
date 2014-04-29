@@ -20,7 +20,13 @@ Just put this HTML into any of your server and it works instantly.
 
 ## Usage.
 
-Give you 25 tracks playlist provided by Audiotool's `/browse/suggestions`. It's pretty cool since it chooses new tracks and I think it also check on the genres?
+Give you 25 tracks playlist provided by Audiotool's `/browse/suggestions`. 
+
+The available hotkeys are:
+P, I, S, F, R, N, X, H (**P**lay/Pause, **I**nformation, **S**kip, **F**avorite, **R**emix, Refresh, Log Out, **H**elp)
+
+## Known Bugs
+The famous prevent-autoplay on mobile.
 
 ## License
 
