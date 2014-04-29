@@ -1,14 +1,18 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>Listen.</title>
+	<title>Listen</title>
+	<link rel="icon" href="/Listen/favi.ico" type="image/x-icon">
 	<meta charset="utf-8">
+	<meta name="description" content="Instant Audiotool auto-brewed playlist for your day.">
+	<meta http-equiv="content-language" content="en-gb">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	<script src="http://kh01.me/lib/jquery.cookie.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans:700,300,200' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Dosis:200&text=Listen.' rel='stylesheet' type='text/css'>
 	<link href="http://kh01.me/lib/grid.bootstrap.min.css" rel="stylesheet" type='text/css'>
 	<style>
 		::-webkit-scrollbar {  display:none;}
@@ -19,15 +23,18 @@
 			 -moz-transition: .2s all ease; -webkit-transition: .2s all ease; transition: .2s all ease;
 			}
 		a:hover { background: rgba(255, 106, 0,0.5); text-decoration:none; color:white;}
-		h1 { color: #ff6a00; font-weight: 200; font-size: 350%; text-shadow: 1px 1px 15px rgba(255, 106, 0,0.4); }
+		h1 { color: #ff6a00; font-weight: 200; font-size: 330%; text-shadow: 1px 1px 15px rgba(255, 106, 0,0.4); }
+		
+		#liner { font-family:'Dosis',sans-serif; font-size:375%; letter-spacing:1px;}
+		
 		#authbutt { padding: 15px 0;border-radius:30px; background: rgba(255, 106, 0,0.6); cursor: pointer;}
 		#login { margin-top: 10px; text-align:center; padding:0}
 		.inputwrap{ padding:10px; font-size:150%; border-radius:30px; border: transparent; background: #323232; color:#aaa;}
 		input { width:100%; border:0; background: inherit; }
 		input[placeholder] { font-weight:200; text-align:center;}
 		
-		#seeker { height:2px; background: #383838; }
-		#wow { background: rgba(255, 106, 0,0.8); width: 00%; height: inherit; border-right: 2px white solid;
+		#seeker { height:2px; background: #383838; overflow:hidden; }
+		#wow { background: rgba(255, 106, 0,0.8); width: 0%; height: 2px; border-right: 2px white solid;
 		-moz-transition: .1s all ease; -webkit-transition: .1s all ease; transition: .1s all ease; 
 		}
 		.butt {display:inline-block; width:30px; height:30px; border-radius:50%; color: rgba(255,255,255,0.7); line-height:30px;
@@ -55,7 +62,7 @@
 </head>
 <body>
 	<div class="container" id="auth" style="text-align:center;">
-		<h1 id="liner">Listen.</h1>
+		<h1 id="liner">Listen</h1>
 		<div class="col-md-4 col-md-offset-4 clearfix" id="authbutt" >
 			Connect to Audiotool
 		</div>
@@ -78,9 +85,11 @@
 			<div id="wow">&nbsp;</div>
 		</div>
 		<div id="controls" style="margin-top:20px;">
-			<div class="butt" id="pause"><div id="togButt">ll</div></div>
+			<div class="butt" id="pause"><div id="togButt"><b>ll</b></div></div>
 			<div class="butt plus" id="info"><b>&nbsp;i&nbsp;</b></div>
 			<div class="butt plus disable" id="fav"><div id="love">♥</div></div>
+			<div id="notify" style="display:inline-block;border-radius:15px; height:30px; background:rgba(255,10,10,0.6);line-height:30px;font-size:85%;padding: 0 15px;">&nbsp;</div>
+			<div class="butt plus hidden-xs" id="helper" onclick="helper();return false;" style="float:right;">?</div>
 		</div>
 
 	</div>
@@ -102,9 +111,67 @@
 		
 		});
 		
+		function helper() {
+		$("#helper").hide();
+		var t="";
+		t += "----------Hotkeys--------\n";
+		t += "\n";
+		t += "H: Show help (this dialog)\n";
+		t += "P: Play / Pause toggle\n";
+		t += "I: New Tab with Current Track on Audiotool\n";
+		t += "R: Remix Current Track (if possible)\n";
+		t += "S: Skip Current Track\n";
+		t += "X: Log out\n";
+		t += "N: Refresh (remove fav-ed track from playlist)\n";
+		t += "F: Favorite Current Track\n";
+		t += "-------------------------\n";
+		t += "(2014) Potasmic. Check GitHub for source";
+		alert(t);
+		
+		}
+		
+		function stitchHotKey() {
+			$(document).keypress(function(ev) {
+				switch(ev.which) {
+					case 104: //h
+						helper();
+					break;	
+					case 112: //p
+						(player.aud.paused === true)? player.play() : player.pause();
+					break;
+					case 105: //i
+						window.open('http://audiotool.com/track/'+player.list[player.currentTrack]+'/');
+					break;
+					case 114: //r
+						window.open('http://audiotool.com/app/'+player.list[player.currentTrack]+'/');
+					break;
+					case 115: //s
+						player.aud.currentTime = player.aud.duration - 1;
+					break;
+					case 120: //x
+						if(confirm("Wanna log out?")) {
+							$.removeCookie("listen-cular-session");
+							notify("You'll be logged out next refresh. If you want to refresh now, press N.");
+						}
+					break;
+					case 110: //n
+						document.location.href = '/Listen';
+					break;
+					case 102: //f
+						(checkFavorite(player.list[player.currentTrack]) )? unfavoriteTrack(player.list[player.currentTrack]) : favoriteTrack(player.list[player.currentTrack]) ;
+					break;
+				}
+			})
+		};
+		
 		function showLogin() {
 			$("#listen").hide();
 			$("#auth").show(); $("#login").show();
+		}
+		
+		function notify(str,delay) {
+			delay = (typeof delay === 'undefined')? 10000: delay;
+			$("#notify").hide().show().text(str).fadeOut(delay);
 		}
 		
 		function checkAuthentication() {
@@ -140,7 +207,6 @@
 					$("#login").slideUp();
 					var authkey = $(xml).find("key")[0].innerHTML;
 					$.cookie('listen-cular-session',authkey, { expires: 7 } );
-					console.log("Successfully authenticated with Audiotool. Congratulations! :D");
 					if(cont === true) {
 					nowListen();
 					}
@@ -157,6 +223,7 @@
 		function nowListen() {
 			var trackarr = [];
 			var authkey = $.cookie('listen-cular-session');
+			stitchHotKey();
 			$.ajax("http://api.audiotool.com//browse/suggestions/?X-Cular-Session="+authkey,
 			{
 				type: "GET",
@@ -171,8 +238,6 @@
 				});
 				player.putList(obj);
 				player.putDuration(dur);
-				player.play();
-				console.log(obj);
 				$("#auth").slideUp();
 				$("#listen").slideDown();
 				$("#ender").text("You've listened for "+Math.floor(dur/1000/60)+" minutes and "+Math.round(dur/1000%60)+" seconds.");
@@ -184,19 +249,24 @@
 		
 		function checkFavorite(key) {
 		$("#love").addClass("love");
+			var backer;
 			var authkey = $.cookie('listen-cular-session');
 			$.ajax("http://api.audiotool.com/track/"+key+"/?X-Cular-Session="+authkey, {
 				type: "GET",
-				dataType: "xml"
+				dataType: "xml",
+				async:false
 				}).done( function(xml) {
 					if( $(xml).find("favorite")[0].innerHTML === "true" ) {
 						$("#fav").removeClass("disable").off().on('click',function() { unfavoriteTrack(key); });
+						backer = true;
 					} else {
 						$("#fav").addClass("disable").off().on('click',function() { favoriteTrack(key); });
+						backer = false;
 					}
 				}).always( function() {
 					$("#love").removeClass("love");
 				});
+			return backer;
 		}
 		
 		
@@ -235,6 +305,7 @@
 			this.list = (typeof arr === 'array')? arr: [] ;
 			this.currentTrack = 0;
 			this.aud.src = "http://api.audiotool.com/track/"+ this.list[this.currentTrack] + "/play." + (this.aud.canPlayType( "audio/ogg" ) ? "ogg" : "mp3") + "?platform=1&ref=listen-app";
+			this.aud.load();
 			this.duration = dur;
 			this.maxTrack = this.list.length;
 			window.interval;
@@ -247,20 +318,21 @@
 			checkFavorite(bleh.list[this.currentTrack]);
 		//Functions
 			this.play = function() {
+				clearInterval(window.interval);
+				this.aud.pause();
 				this.aud.play();
 				window.interval = setInterval(bleh.update, 100);
-				$("#pause").removeClass("disable").on('click',function() { bleh.pause(); } ).html("<div id='togButt'>ll</div>");
-				checkFavorite(bleh.list[bleh.currentTrack]);
+				$("#pause").removeClass("disable").on('click',function() { bleh.pause(); } ).html("<div id='togButt'><b>ll</b></div>");
+				
 			}
 			
-			this.aud.addEventListener('ended', bleh.nextTrack, false);
 			this.aud.addEventListener('waiting', function() { $("#togButt").addClass("love"); }, false);
 			this.aud.addEventListener('playing', function() { $("#togButt").removeClass("love"); }, false);
-			this.aud.addEventListener('error',function () {  },false);
+			this.aud.addEventListener('error',function () { notify("Error loading audio"); },false);
 			
 			this.update = function() {
 				$("#wow")[0].style.width = bleh.aud.currentTime/bleh.aud.duration*100 +"%";
-				if(bleh.aud.currentTime === bleh.aud.duration) {
+				if(bleh.aud.currentTime === bleh.aud.duration && bleh.aud.currentTime > 10) {
 					bleh.nextTrack();
 				}
 			}
@@ -273,7 +345,7 @@
 			
 			this.nextTrack = function() {
 				clearInterval(window.interval);
-				if(this.currentTrack+1 === this.list.length ) {
+				if(this.currentTrack+1 >= this.list.length ) {
 					clearInterval(window.interval);
 					finishedListen();
 				} else {
@@ -286,7 +358,7 @@
 					this.play();
 				}
 			}
-			
+
 			
 			
 			this.getList = function() {
@@ -294,13 +366,21 @@
 			}
 			
 			this.putList = function(arry) {
+	
 				this.list = arry;
 				this.currentTrack = 0;
-				this.aud.src = "http://api.audiotool.com/track/"+ this.list[0] + "/play." + (this.aud.canPlayType( "audio/ogg" ) ? "ogg" : "mp3") + "?platform=1&ref=listen-app";
+				bleh.aud.src = "http://api.audiotool.com/track/"+ bleh.list[0] + "/play." + (bleh.aud.canPlayType( "audio/ogg" ) ? "ogg" : "mp3") + "?platform=1&ref=listen-app";
+				bleh.aud.load();
+				bleh.play();
+				checkFavorite(bleh.list[bleh.currentTrack]);
 			}
 			
 			this.putDuration = function (i) {
 				this.duration = i;
+			}
+			
+			this.exploit = function() {
+				alert("Tracks are: \n** "+this.list.join("\n** "));
 			}
 			
 		});
@@ -339,6 +419,8 @@
 		$("#login").hide();
 		//For #listen
 		$("#seeker").css( {marginTop: (docH/2)-1 } );
+		
+		$("#notify").hide();
 		
 	});
 	</script>
