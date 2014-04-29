@@ -27,7 +27,7 @@
 		
 		#liner { font-family:'Dosis',sans-serif; font-size:375%; letter-spacing:1px;}
 		
-		#authbutt { padding: 15px 0;border-radius:30px; background: rgba(255, 106, 0,0.6); cursor: pointer;}
+		#authbutt, #logbutt { padding: 15px 0;border-radius:30px; background: rgba(255, 106, 0,0.6); cursor: pointer;}
 		#login { margin-top: 10px; text-align:center; padding:0}
 		.inputwrap{ padding:10px; font-size:150%; border-radius:30px; border: transparent; background: #323232; color:#aaa;}
 		input { width:100%; border:0; background: inherit; }
@@ -90,6 +90,8 @@
 			<div class="butt plus disable" id="fav"><div id="love">♥</div></div>
 			<div id="notify" style="display:inline-block;border-radius:15px; height:30px; background:rgba(255,10,10,0.6);line-height:30px;font-size:85%;padding: 0 15px;">&nbsp;</div>
 			<div class="butt plus hidden-xs" id="helper" onclick="helper();return false;" style="float:right;">?</div>
+			<div class="butt plus visible-xs" onclick="player.skip();" style="float:right;margin:0 5px;">»</div> &nbsp;
+			<div class="butt plus visible-xs" onclick="logOut();" style="float:right;">&times;</div>
 		</div>
 
 	</div>
@@ -146,13 +148,10 @@
 						window.open('http://audiotool.com/app/'+player.list[player.currentTrack]+'/');
 					break;
 					case 115: //s
-						player.aud.currentTime = player.aud.duration - 1;
+						player.skip();
 					break;
 					case 120: //x
-						if(confirm("Wanna log out?")) {
-							$.removeCookie("listen-cular-session");
-							notify("You'll be logged out next refresh. If you want to refresh now, press N.");
-						}
+						logOut();
 					break;
 					case 110: //n
 						document.location.href = '/Listen';
@@ -163,6 +162,13 @@
 				}
 			})
 		};
+		
+		function logOut() {
+			if(confirm("Wanna log out?")) {
+					$.removeCookie("listen-cular-session");
+					notify("You'll be logged out next refresh. If you want to refresh now, press N.");
+				}
+		}
 		
 		function showLogin() {
 			$("#listen").hide();
@@ -363,6 +369,10 @@
 			
 			this.getList = function() {
 				return this.list;
+			}
+			
+			this.skip = function() {
+				bleh.aud.currentTime = bleh.aud.duration - 1;
 			}
 			
 			this.putList = function(arry) {
