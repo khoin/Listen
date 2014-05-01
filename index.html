@@ -118,45 +118,52 @@
 		var t="";
 		t += "----------Hotkeys--------\n";
 		t += "\n";
-		t += "H: Show help (this dialog)\n";
-		t += "P: Play / Pause toggle\n";
-		t += "I: New Tab with Current Track on Audiotool\n";
-		t += "R: Remix Current Track (if possible)\n";
-		t += "S: Skip Current Track\n";
-		t += "X: Log out\n";
-		t += "N: Refresh (remove fav-ed track from playlist)\n";
-		t += "F: Favorite Current Track\n";
+		t += "H	: Show help (this dialog)\n";
+		t += "P	: Play / Pause toggle\n";
+		t += "→	: Skip Current Track\n";
+		t += "←	: Return to Previous Track\n";
+		t += "I	: New Tab with Current Track on Audiotool\n";
+		t += "R	: Remix Current Track (if possible)\n";
+		t += "X	: Log out\n";
+		t += "N	: Refresh (remove fav-ed track from playlist)\n";
+		t += "F	: Favorite Current Track\n";
 		t += "-------------------------\n";
-		t += "(2014) Potasmic. Check GitHub for source";
+		t += "(2014) Potasmic. Check GitHub for source.\n Playlist compiled by Audiotool.";
 		alert(t);
 		
 		}
 		
 		function stitchHotKey() {
-			$(document).keypress(function(ev) {
-				switch(ev.which) {
-					case 104: //h
+			$(document).keydown(function(ev) {
+				ev = ev || window.event;
+				switch(ev.keyCode || ev.which) {
+					case 72: //h
 						helper();
 					break;	
-					case 112: //p
+					case 80: //p
 						(player.aud.paused === true)? player.play() : player.pause();
 					break;
-					case 105: //i
+					case 73: //i
 						window.open('http://audiotool.com/track/'+player.list[player.currentTrack]+'/');
 					break;
-					case 114: //r
+					case 82: //r
 						window.open('http://audiotool.com/app/'+player.list[player.currentTrack]+'/');
 					break;
-					case 115: //s
+					case 39: //right arrow
+						ev.preventDefault();
 						player.skip();
 					break;
-					case 120: //x
+					case 37: //left arrow
+						ev.preventDefault();
+						player.prevTrack();
+					break;
+					case 88: //x
 						logOut();
 					break;
-					case 110: //n
+					case 78: //n
 						document.location.href = '/Listen';
 					break;
-					case 102: //f
+					case 70: //f
 						(checkFavorite(player.list[player.currentTrack]) )? unfavoriteTrack(player.list[player.currentTrack]) : favoriteTrack(player.list[player.currentTrack]) ;
 					break;
 				}
@@ -362,17 +369,29 @@
 					$("#fav").off().on('click', function() { favoriteTrack(bleh.list[bleh.currentTrack]); });
 					checkFavorite(bleh.list[bleh.currentTrack]);
 					this.play();
+					notify("Track "+(bleh.currentTrack+1)+" of 25");
 				}
 			}
 
-			
+			this.prevTrack = function() {
+				clearInterval(window.interval);
+				this.aud.src = "http://api.audiotool.com/track/"+ this.list[this.currentTrack-1] + "/play." + (this.aud.canPlayType( "audio/ogg" ) ? "ogg" : "mp3") + "?platform=1&ref=listen-app";
+					this.aud.load();
+					this.currentTrack -= 1;
+					$("#info").off().on('click', function() { window.open('http://audiotool.com/track/'+bleh.list[bleh.currentTrack]+'/'); });
+					$("#fav").off().on('click', function() { favoriteTrack(bleh.list[bleh.currentTrack]); });
+					checkFavorite(bleh.list[bleh.currentTrack]);
+					this.play();
+					notify("Track "+(bleh.currentTrack+1)+" of 25");
+			}
 			
 			this.getList = function() {
 				return this.list;
 			}
 			
 			this.skip = function() {
-				bleh.aud.currentTime = bleh.aud.duration - 1;
+				bleh.aud.currentTime = bleh.aud.duration;
+				notify("Track "+(bleh.currentTrack+2)+" of 25");
 			}
 			
 			this.putList = function(arry) {
