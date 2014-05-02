@@ -1,3 +1,6 @@
+<?php
+	header("Access-Control-Allow-Origin: http://www.audiotool.com");
+?>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -27,7 +30,7 @@
 		
 		#liner { font-family:'Dosis',sans-serif; font-size:375%; letter-spacing:1px;}
 		
-		#authbutt, #logbutt { padding: 15px 0;border-radius:30px; background: rgba(255, 106, 0,0.6); cursor: pointer;}
+		#authbutt, #logbutt, #playlistbutt { padding: 15px 0;border-radius:30px; background: rgba(255, 106, 0,0.6); cursor: pointer;}
 		#login { margin-top: 10px; text-align:center; padding:0}
 		.inputwrap{ padding:10px; font-size:150%; border-radius:30px; border: transparent; background: #323232; color:#aaa;}
 		input { width:100%; border:0; background: inherit; }
@@ -85,13 +88,21 @@
 			<div id="wow">&nbsp;</div>
 		</div>
 		<div id="controls" style="margin-top:20px;">
-			<div class="butt" id="pause"><div id="togButt"><b>ll</b></div></div>
-			<div class="butt plus" id="info"><b>&nbsp;i&nbsp;</b></div>
-			<div class="butt plus disable" id="fav"><div id="love">♥</div></div>
-			<div id="notify" style="display:inline-block;border-radius:15px; height:30px; background:rgba(255,10,10,0.6);line-height:30px;font-size:85%;padding: 0 15px;">&nbsp;</div>
-			<div class="butt plus hidden-xs" id="helper" onclick="helper();return false;" style="float:right;">?</div>
-			<div class="butt plus visible-xs" onclick="player.skip();" style="float:right;margin:0 5px;">»</div> &nbsp;
-			<div class="butt plus visible-xs" onclick="logOut();" style="float:right;">&times;</div>
+			<div>
+				<div class="butt" id="pause"><div id="togButt"><b>ll</b></div></div>
+				<div class="butt plus" id="info"><b>&nbsp;i&nbsp;</b></div>
+				<div class="butt plus disable" id="fav"><div id="love">♥</div></div>
+				<div id="notify" style="display:inline-block;border-radius:15px; height:30px; background:rgba(255,10,10,0.6);line-height:30px;font-size:85%;padding: 0 15px;">&nbsp;</div>
+				<div class="butt plus hidden-xs" id="helper" onclick="helper();return false;" style="float:right;">?</div>
+				<div class="butt plus visible-xs" onclick="player.skip();" style="float:right;margin:0 5px;">»</div> &nbsp;
+				<div class="butt plus visible-xs" onclick="logOut();" style="float:right;">&times;</div>
+			</div>
+			<div class="col-md-4 col-md-offset-4 visible-xs" id="playlistbutt" style="margin-top:20px;background:rgba(10,255,128,0.6);clear:both;text-align:center;" >
+				Start Playlist!
+			</div>
+			<script>
+				$("#playlistbutt").off().on('click',function() { player.pause();player.play(); $("#playlistbutt").remove(); } );
+			</script>
 		</div>
 
 	</div>
@@ -173,7 +184,7 @@
 		function logOut() {
 			if(confirm("Wanna log out?")) {
 					$.removeCookie("listen-cular-session");
-					notify("You'll be logged out next refresh. If you want to refresh now, press N.");
+					notify("Logged out. Press N and restart.");
 				}
 		}
 		
@@ -193,10 +204,13 @@
 				{
 					a[ b[ 0 ] ] = b[ 1 ];
 					return a;
-				}, {} )[ "listen-cular-session" ];
-			if(authkey) {
+				}, {} );
+			if(window.authkey[ "listen-cular-session"] ) {
+				window.authkey = window.authkey["listen-cular-session"];
+				return true;	
+			} else if(window.authkey["cular-session"] ) { 
+				window.authkey = window.authkey["cular-session"];
 				return true;
-				
 			} else { return false; }
 		}
 		
@@ -218,9 +232,10 @@
 				} else{
 					$("#authbutt").css({animation: ".3s all ease", background:"rgba(10,255,128,0.6)"}).text("You're ready. Now, listen.");
 					$("#login").slideUp();
-					var authkey = $(xml).find("key")[0].innerHTML;
-					$.cookie('listen-cular-session',authkey, { expires: 7 } );
+					var auth = $(xml).find("key")[0].innerHTML;
+					$.cookie('listen-cular-session',auth, { expires: 7 } );
 					if(cont === true) {
+					checkAuthentication();
 					nowListen();
 					}
 				}
@@ -235,9 +250,8 @@
 		
 		function nowListen() {
 			var trackarr = [];
-			var authkey = $.cookie('listen-cular-session');
 			stitchHotKey();
-			$.ajax("http://api.audiotool.com//browse/suggestions/?X-Cular-Session="+authkey,
+			$.ajax("http://api.audiotool.com//browse/suggestions/?X-Cular-Session="+window.authkey,
 			{
 				type: "GET",
 				dataType: "xml"
@@ -263,8 +277,7 @@
 		function checkFavorite(key) {
 		$("#love").addClass("love");
 			var backer;
-			var authkey = $.cookie('listen-cular-session');
-			$.ajax("http://api.audiotool.com/track/"+key+"/?X-Cular-Session="+authkey, {
+			$.ajax("http://api.audiotool.com/track/"+key+"/?X-Cular-Session="+window.authkey, {
 				type: "GET",
 				dataType: "xml",
 				async:false
@@ -285,8 +298,7 @@
 		
 		function favoriteTrack(key) {
 		$("#love").addClass("love");
-			var authkey = $.cookie('listen-cular-session');
-			$.ajax("http://api.audiotool.com/track/"+key+"/favorite/?X-Cular-Session="+authkey,{type:"get",dataType:"xml"})
+			$.ajax("http://api.audiotool.com/track/"+key+"/favorite/?X-Cular-Session="+window.authkey,{type:"get",dataType:"xml"})
 			.done( function(xml) {
 				if($(xml).find("yey").length > 0) {
 					$("#fav").removeClass("disable").off().on('click',function() { unfavoriteTrack(key); });
@@ -301,8 +313,7 @@
 		
 		function unfavoriteTrack(key) {
 		$("#love").addClass("love");
-			var authkey = $.cookie('listen-cular-session');
-			$.ajax("http://api.audiotool.com/track/"+key+"/unfavorite/?X-Cular-Session="+authkey,{type:"get",dataType:"xml"})
+			$.ajax("http://api.audiotool.com/track/"+key+"/unfavorite/?X-Cular-Session="+window.authkey,{type:"get",dataType:"xml"})
 			.done( function(xml) {
 				if($(xml).find("yey").length > 0) {
 					$("#fav").addClass("disable").off().on('click',function() { favoriteTrack(key); });
@@ -336,7 +347,7 @@
 				this.aud.play();
 				window.interval = setInterval(bleh.update, 100);
 				$("#pause").removeClass("disable").on('click',function() { bleh.pause(); } ).html("<div id='togButt'><b>ll</b></div>");
-				
+	
 			}
 			
 			this.aud.addEventListener('waiting', function() { $("#togButt").addClass("love"); }, false);
