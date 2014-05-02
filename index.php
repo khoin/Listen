@@ -69,7 +69,7 @@
 		<div class="col-md-4 col-md-offset-4 clearfix" id="authbutt" >
 			Connect to Audiotool
 		</div>
-		<div class="col-md-4 col-md-offset-4" id="login">
+		<div class="col-md-4 col-md-offset-4" id="login" style="display:none;">
 			<div class="col-md-5 col-xs-12 inputwrap" style="float:left;margin-bottom:10px">
 				<input type="text" id="username" placeholder="username">
 			</div>
