@@ -131,8 +131,8 @@
 		t += "\n";
 		t += "H	: Show help (this dialog)\n";
 		t += "P	: Play / Pause toggle\n";
-		t += "→	: Skip Current Track\n";
-		t += "←	: Return to Previous Track\n";
+		t += "Right Arrow	: Skip Current Track\n";
+		t += "Left Arrow	: Return to Previous Track\n";
 		t += "I	: New Tab with Current Track on Audiotool\n";
 		t += "R	: Remix Current Track (if possible)\n";
 		t += "X	: Log out\n";
