@@ -188,8 +188,9 @@
 				}
 		}
 		
-		function showLogin() {
+		function showLogin(a) {
 			$("#listen").hide();
+			$("#authbutt").text(a);
 			$("#auth").show(); $("#login").show();
 		}
 		
@@ -233,7 +234,7 @@
 					$("#authbutt").css({animation: ".3s all ease", background:"rgba(10,255,128,0.6)"}).text("You're ready. Now, listen.");
 					$("#login").slideUp();
 					var auth = $(xml).find("key")[0].innerHTML;
-					$.cookie('listen-cular-session',auth, { expires: 7 } );
+					$.cookie('listen-cular-session',auth, { expires: 5 } );
 					if(cont === true) {
 					checkAuthentication();
 					nowListen();
@@ -242,6 +243,7 @@
 				
 			}).fail ( function(xhr,msg) {
 				alert("Failed authenticating: "+msg);
+				
 			});
 			//If cont is passed, execute nowListen();
 			
@@ -270,7 +272,14 @@
 				$("#ender").text("You've listened for "+Math.floor(dur/1000/60)+" minutes and "+Math.round(dur/1000%60)+" seconds.");
 			 })
 			 .fail( function(xml) {
-			 
+				if(xml.status === 500) {
+					//Key expired. Request new
+					$.removeCookie('listen-cular-session');
+					$(document).off();
+					showLogin("Session expired");
+				} else {
+					alert("Failed Contacting Audiotool");
+				}
 			 });
 		}
 		
